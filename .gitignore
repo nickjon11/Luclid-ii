@@ -1,0 +1,24 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+build/
+dist/
+*.egg-info/
+.env
+*.db
+*.sqlite3
+
+# Credentials and private configuration
+.env.*
+client_secret*.json
+credentials.json
+token.json
+*oauth_token*.json
+*.token
+*.pem
+*.key
+
+# Local application settings
+*.log
+.DS_Store

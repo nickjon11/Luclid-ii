@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "luclid-ii-agent"
+version = "0.5.7"
+description = "Offline-first desktop AI assistant"
+requires-python = ">=3.11"
+dependencies = ["PySide6>=6.7,<7", "requests>=2.32,<3", "psutil>=6,<8", "keyring>=25,<27", "pypdf>=5,<7", "python-docx>=1.1,<2", "beautifulsoup4>=4.12,<5", "playwright>=1.50,<2"]
+
+[project.scripts]
+luclid-ii = "local_muse.app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+local_muse = ["assets/*.png", "assets/*.ico", "assets/*.gif"]
