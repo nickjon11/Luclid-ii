@@ -9,7 +9,7 @@ dist/
 *.db
 *.sqlite3
 
-# Credentials and private configuration
+# Private account settings and tokens
 .env.*
 client_secret*.json
 credentials.json
@@ -18,7 +18,4 @@ token.json
 *.token
 *.pem
 *.key
-
-# Local application settings
-*.log
-.DS_Store
+google_oauth_public.json

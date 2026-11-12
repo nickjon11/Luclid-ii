@@ -1,3 +1,27 @@
+# Luclid-ii — AI Agent v0.7.0
+
+Cross-platform desktop AI agent, powered by local Ollama models.
+
+**Preferred:** Download the native application for your operating system from the GitHub release. Windows: `Luclid-ii.exe` inside the extracted Windows package; macOS: `Luclid-ii.app`; Linux: `Luclid-ii` or install the `.deb` on Debian-based systems. The Windows executable is built without a command-prompt window. Ollama remains a separate optional dependency.
+
+**Fallback:** `run_windows.bat` starts an existing source installation with `.venv`; `Launch Luclid-ii.bat` runs the Python setup wizard. These require Python and are not the primary installation path.
+
+**Building:** See `INSTALL.md` and `.github/workflows/build-releases.yml`. Builds must run on their respective OS runners; a Windows `.exe` cannot be reliably built on Linux using ordinary PyInstaller.
+
+**History:** `CHANGELOG_v0.5.x.md`, `CHANGELOG_v0.6.x.md`, `legacy_install_v0.6.X.md`.
+
+---
+
+## Legacy project notes
+
+## v0.6.2 update
+
+See `CHANGELOG_v0.6.2.md` for the local-only resume match fix, safer web queries, and GIF wallpaper compatibility updates.
+
+## v0.6.1 update
+
+See `CHANGELOG_v0.6.1.md` for the new LinkedIn Job Explorer and Google sign-in configuration. Public OAuth needs a real Google Cloud client ID and potentially verification.
+
 # Luclid-ii - AI Agent v0.4.0
 
 Windows-first, local Ollama-powered assistant developed by Jonathan Lachman. The local model and conversation history do not require a cloud AI provider.
@@ -136,3 +160,22 @@ Under **Tools > Web Research (optional)** choose Offline only, Ask before online
 
 ## v0.5.7.1 wallpapers
 Choose **View → Customize Wallpapers…**. Set a universal wallpaper, or switch to individual mode and override individual sections. Sample images are included in `wallpapers/`. Wallpaper opacity defaults to 20%. Gmail AI-generated replies now begin with a local-time greeting.
+
+
+## v0.6.3 one-step launch and deployment
+
+See [DEPLOYMENT_v0.6.3.md](DEPLOYMENT_v0.6.3.md) for Windows/macOS/Linux launchers, GitHub Actions packaging, and Debian .deb instructions. A public APT repository has **not** been published yet.
+
+
+### Windows windowless launch (v0.6.23)
+After installation, double-click **Launch Luclid-ii.pyw** to start without a Command Prompt.
+For the graphical installer, double-click **Luclid-ii-Setup.pyw** (Python must have the `.pyw` association).
+The `.bat` files remain only as optional troubleshooting launchers and may show a console.
+
+### Workspace terminal
+Select **File → Open Workspace…** to make the Terminal tab start in that folder.
+`cd`, `Set-Location`, and `sl` persist between commands; changing workspace resets the terminal directory.
+Commands still require individual approval.
+
+### One-time native installation (v0.7.0)
+Install with the Windows setup EXE, macOS DMG, or Linux DEB once; then launch the installed app directly from Start Menu, Applications, or your desktop environment. Portable ZIPs and the legacy Windows BAT fallback remain available. See [INSTALL.md](INSTALL.md).

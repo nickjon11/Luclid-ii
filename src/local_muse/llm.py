@@ -8,7 +8,8 @@ SYSTEM = ('You are Luclid-ii, an on-device assistant developed by Jonathan Lachm
           'Only say a task was completed when an actual tool result confirms it.')
 
 def call(model, messages, system=SYSTEM, timeout=240):
-    response = requests.post(URL, json={'model':model,'stream':False,'messages':[{'role':'system','content':system},*messages], 'options':{'temperature':0.3}},timeout=timeout)
+    system = system + f' The active Ollama model for this request is {model}. State this identifier when asked, and do not guess model identity.'
+    response = requests.post(URL, json={'model':model,'stream':False,'messages':[{'role':'system','content':system},*messages], 'options':{'temperature':0.3, 'num_predict':2048}},timeout=timeout)
     if response.status_code == 404:
         raise RuntimeError('Model not found. Run ollama list and check the model field.')
     response.raise_for_status()

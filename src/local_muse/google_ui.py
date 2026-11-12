@@ -1,5 +1,8 @@
 """Google Calendar / Gmail dialogs for the desktop client."""
 import threading
+import os
+import json
+from pathlib import Path
 import re
 from datetime import datetime, timedelta
 from PySide6.QtCore import QObject, Signal, Qt, QDate, QTime, QDateTime
@@ -32,25 +35,67 @@ class GoogleDialog(QDialog):
         self.status=QLabel('Connected (credentials stored in OS keyring)' if self.api.connected() else 'Not connected')
         layout.addWidget(self.status)
         self.tabs=QTabWidget();layout.addWidget(self.tabs)
+        # Account-first layout. Advanced OAuth fields live in their own dialog.
         connect=QWidget();cl=QVBoxLayout(connect)
-        intro=QLabel(NOTICE);intro.setWordWrap(True);cl.addWidget(intro)
-        cl.addWidget(QLabel('Google Cloud OAuth Desktop client ID (configured by app owner):'))
-        self.client=QLineEdit();self.client.setPlaceholderText('123456789-xxxx.apps.googleusercontent.com');cl.addWidget(self.client)
-        cl.addWidget(QLabel('Desktop OAuth client secret (from your private Google Cloud JSON):'))
-        self.secret=QLineEdit();self.secret.setEchoMode(QLineEdit.EchoMode.Password)
-        self.secret.setPlaceholderText('Paste the Desktop client secret — never share it publicly')
-        cl.addWidget(self.secret)
-        cl.addWidget(QLabel('Choose exactly which capabilities to authorize:'))
+        cl.setSpacing(12)
+        title=QLabel('Google Account Connection')
+        title.setStyleSheet('font-size:16px;font-weight:bold;')
+        cl.addWidget(title)
+        cards=QHBoxLayout()
+        left=QFrame();left.setFrameShape(QFrame.Shape.StyledPanel)
+        ll=QVBoxLayout(left)
+        ll.addWidget(QLabel('Connect your Google Account'))
+        explain=QLabel('Connect Gmail and Calendar with Google’s secure browser sign-in. Your local chat history is not uploaded.')
+        explain.setWordWrap(True);ll.addWidget(explain)
+        sign_in=QPushButton('Sign in with Google');sign_in.setMinimumHeight(42)
+        sign_in.clicked.connect(self.connect_account);ll.addWidget(sign_in)
+        advanced_btn=QPushButton('Advanced OAuth Settings…')
+        advanced_btn.clicked.connect(self.show_advanced_oauth);ll.addWidget(advanced_btn)
+        ll.addStretch();cards.addWidget(left,3)
+        middle=QFrame();middle.setFrameShape(QFrame.Shape.StyledPanel)
+        ml_status=QVBoxLayout(middle)
+        ml_status.addWidget(QLabel('Connection Status'))
+        self.connection_summary=QLabel('Connected' if self.api.connected() else 'Not connected')
+        self.connection_summary.setStyleSheet('font-weight:bold;font-size:14px;')
+        ml_status.addWidget(self.connection_summary)
+        self.gmail_summary=QLabel('Gmail: '+('Connected' if self.api.connected() else 'Not connected'))
+        self.calendar_summary=QLabel('Calendar: '+('Connected' if self.api.connected() else 'Not connected'))
+        ml_status.addWidget(self.gmail_summary);ml_status.addWidget(self.calendar_summary)
+        ml_status.addWidget(QLabel('Credentials: OS keyring'))
+        disconnect=QPushButton('Disconnect');disconnect.clicked.connect(self.disconnect)
+        ml_status.addWidget(disconnect);ml_status.addStretch();cards.addWidget(middle,2)
+        right=QFrame();right.setFrameShape(QFrame.Shape.StyledPanel)
+        rl=QVBoxLayout(right)
+        rl.addWidget(QLabel('Selected Permissions'))
         self.perms={}
         for key,label,default in [('calendar_read','View calendar events',True),('calendar_write','Create calendar events',False),
                                   ('gmail_read','Read Gmail messages',True),('gmail_compose','Create Gmail drafts (future feature)',False),
                                   ('gmail_send','Send email after confirmation',False)]:
-            box=QCheckBox(label);box.setChecked(default);box.setEnabled(key!='gmail_compose');cl.addWidget(box);self.perms[key]=box
-        row=QHBoxLayout()
-        connect_btn=QPushButton('Connect Google Account');connect_btn.clicked.connect(self.connect_account);row.addWidget(connect_btn)
-        disconnect=QPushButton('Disconnect');disconnect.clicked.connect(self.disconnect);row.addWidget(disconnect)
-        cl.addLayout(row);cl.addStretch()
-        self.tabs.addTab(connect,'Connect / Permissions')
+            box=QCheckBox(label);box.setChecked(default);box.setEnabled(key!='gmail_compose')
+            rl.addWidget(box);self.perms[key]=box
+        manage=QPushButton('Manage Permissions');manage.clicked.connect(lambda:self.tabs.setCurrentWidget(permissions_page))
+        rl.addWidget(manage);rl.addStretch();cards.addWidget(right,3)
+        cl.addLayout(cards,1)
+        info=QLabel('Permissions take effect after authorization. Google may require you to reconnect when changing scopes.')
+        info.setWordWrap(True);cl.addWidget(info)
+        self.tabs.addTab(connect,'Account')
+        permissions_page=QWidget();pl=QVBoxLayout(permissions_page)
+        pl.addWidget(QLabel('Choose the Google features you want Luclid-ii to access.'))
+        for key,box in self.perms.items():
+            # The checkboxes remain on the Account card; this page explains their use.
+            pl.addWidget(QLabel(('Enabled: ' if box.isChecked() else 'Optional: ')+box.text()))
+        pl.addWidget(QLabel('Change selections on the Account tab, then reconnect to authorize new scopes.'))
+        back=QPushButton('Back to Account');back.clicked.connect(lambda:self.tabs.setCurrentWidget(connect))
+        pl.addWidget(back);pl.addStretch();self.tabs.addTab(permissions_page,'Permissions')
+        config_path = Path(__file__).resolve().parents[2] / 'google_oauth_public.json'
+        self.app_client_id = os.getenv('LUCLID_GOOGLE_CLIENT_ID', '').strip()
+        if not self.app_client_id and config_path.is_file():
+            try:self.app_client_id=json.loads(config_path.read_text(encoding='utf-8')).get('client_id','').strip()
+            except (ValueError,OSError,AttributeError):pass
+        self.app_client_id=self.app_client_id if self.app_client_id.endswith('.apps.googleusercontent.com') else ''
+        self.use_advanced=False
+        self.advanced_client_id=''
+        self.advanced_client_secret=''
         cal=QWidget();cal_l=QVBoxLayout(cal)
         cal_l.addWidget(QLabel('Google Calendar — select a date to view or create events'))
         self.calendar=QCalendarWidget()
@@ -139,19 +184,45 @@ class GoogleDialog(QDialog):
             self.message.setText('Completed successfully.')
             self._callback(result)
 
+    def show_advanced_oauth(self):
+        dialog=QDialog(self);dialog.setWindowTitle('Advanced Developer OAuth Settings')
+        dialog.resize(530,210)
+        form=QFormLayout(dialog)
+        form.addRow(QLabel('Use your own Google Cloud Desktop OAuth client. Never share tokens or secrets.'))
+        client_input=QLineEdit(self.advanced_client_id)
+        client_input.setPlaceholderText('123456789-xxxx.apps.googleusercontent.com')
+        secret_input=QLineEdit(self.advanced_client_secret)
+        secret_input.setEchoMode(QLineEdit.EchoMode.Password)
+        form.addRow('Client ID:',client_input)
+        form.addRow('Client secret (optional):',secret_input)
+        buttons=QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        buttons.accepted.connect(dialog.accept);buttons.rejected.connect(dialog.reject);form.addRow(buttons)
+        if dialog.exec()==QDialog.DialogCode.Accepted:
+            self.advanced_client_id=client_input.text().strip()
+            self.advanced_client_secret=secret_input.text().strip()
+            self.use_advanced=bool(self.advanced_client_id)
+            self.message.setText('Advanced OAuth configuration selected.' if self.use_advanced else 'Using application OAuth configuration.')
+
+    def _refresh_connection(self):
+        connected=self.api.connected()
+        self.status.setText('Connected (credentials stored in OS keyring)' if connected else 'Not connected')
+        self.connection_summary.setText('Connected' if connected else 'Not connected')
+        self.gmail_summary.setText('Gmail: '+('Connected' if connected else 'Not connected'))
+        self.calendar_summary.setText('Calendar: '+('Connected' if connected else 'Not connected'))
+
     def connect_account(self):
         scopes=[key for key,box in self.perms.items() if box.isChecked()]
-        client=self.client.text().strip()
+        client=self.advanced_client_id if self.use_advanced else self.app_client_id
         if not client or not scopes:
-            QMessageBox.warning(self,'Google Account','Enter your Desktop OAuth client ID and select permissions.')
+            QMessageBox.warning(self,'Google Account','Select permissions and configure a Google Desktop OAuth client ID (app owner or Advanced settings).')
             return
         if QMessageBox.question(self,'Authorize Google',NOTICE+'\n\nContinue to Google sign-in?') != QMessageBox.StandardButton.Yes:return
-        secret=self.secret.text().strip()
-        self.run_task(lambda:self.api.connect(client,scopes,client_secret=secret),lambda _:self.status.setText('Connected'))
+        secret=self.advanced_client_secret if self.use_advanced else ''
+        self.run_task(lambda:self.api.connect(client,scopes,client_secret=secret),lambda _:self._refresh_connection())
 
     def disconnect(self):
         if QMessageBox.question(self,'Disconnect','Remove the saved Google tokens from this device?') != QMessageBox.StandardButton.Yes:return
-        self.api.disconnect();self.status.setText('Not connected');self.cal_list.clear();self.mail_list.clear()
+        self.api.disconnect();self._refresh_connection();self.cal_list.clear();self.mail_list.clear()
 
     def filter_events(self):
         self.cal_list.clear()
