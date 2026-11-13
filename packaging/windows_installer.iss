@@ -28,4 +28,4 @@ Name: "{autodesktop}\Luclid-ii"; Filename: "{app}\Luclid-ii.exe"; Tasks: desktop
 [Tasks]
 Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription: "Additional shortcuts:"; Flags: checkedonce
 [Run]
-Filename: "{app}\Luclid-ii.exe"; Description: "Launch Luclid-ii"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\Luclid-ii.exe"; Description: "Launch Luclid-ii"; Flags: nowait postinstall skipifsilent unchecked

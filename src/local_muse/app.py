@@ -182,7 +182,7 @@ class WallpaperOverlay(QWidget):
 
 
 class WallpaperSettings(QDialog):
-    SECTIONS = ('Chat', 'GitHub', 'LinkedIn', 'Google', 'System Info', 'Automation & Tasks', 'Terminal', 'Saved Documents', 'AI Task Planner')
+    SECTIONS = ('Chat', 'GitHub', 'LinkedIn', 'Google', 'System Info', 'Automation Tasks', 'Terminal', 'Saved Documents', 'AI Task Planner')
     def __init__(self, settings, parent=None):
         super().__init__(parent)
         self.settings = settings
@@ -199,7 +199,7 @@ class WallpaperSettings(QDialog):
         scroller=QScrollArea(self);scroller.setWidgetResizable(True);scroller.setMinimumHeight(155)
         scroll_widget=QWidget();scroll_layout=QVBoxLayout(scroll_widget)
         scroller.setWidget(scroll_widget);layout.addWidget(scroller,1)
-        for name, key in [('Universal', 'universal')] + [(name, {'Automation & Tasks':'tasks','AI Task Planner':'planner','Saved Documents':'documents','System Info':'system_info'}.get(name,name.lower().replace(' ', '_'))) for name in self.SECTIONS]:
+        for name, key in [('Universal', 'universal')] + [(name, {'Automation Tasks':'tasks','AI Task Planner':'planner','Saved Documents':'documents','System Info':'system_info'}.get(name,name.lower().replace(' ', '_'))) for name in self.SECTIONS]:
             row = QHBoxLayout()
             label = QLabel(name); label.setMinimumWidth(95); row.addWidget(label)
             value = QLineEdit(str(settings.value('wallpaper/' + key, '') or ''))
@@ -746,7 +746,7 @@ class Window(QMainWindow):
         # Service navigation lives directly below File / View / Tools / Help.
         nav=QHBoxLayout()
         self.nav_buttons={}
-        for label,key in [('Chat','chat'),('GitHub','github'),('LinkedIn','linkedin'),('Google - Calendar and Email','google'),('Automation & Tasks','tasks'),('Terminal','terminal')]:
+        for label,key in [('Chat','chat'),('GitHub','github'),('LinkedIn','linkedin'),('Google - Calendar and Email','google'),('Automation Tasks','tasks'),('Terminal','terminal')]:
             button=QPushButton(label)
             button.setMinimumHeight(30)
             button.clicked.connect(lambda checked=False,k=key:self.show_section(k))
