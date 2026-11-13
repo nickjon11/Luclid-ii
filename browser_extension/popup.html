@@ -1,1 +1,67 @@
-<!doctype html><html><head><meta charset="utf-8"><style>body{font:14px sans-serif;background:#211a2d;color:#fff;width:290px;padding:14px}button,textarea{width:100%;box-sizing:border-box;margin:6px 0;padding:8px}button{background:#7950a6;color:white;border:1px solid #bd9cdd}textarea{height:130px}</style></head><body><h3>Luclid-ii Job Copilot</h3><p>Preview: paste a JSON object of application fields to fill. Review the page before submitting.</p><textarea id="fields" placeholder='{"full_name":"Example Person","email":"example@example.com"}'></textarea><button id="preview">Preview matching fields</button><button id="fill">Fill reviewed fields</button><p id="status" role="status"></p><script src="popup.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Luclid-ii Browser Extension</title>
+<style>
+  :root {color-scheme:dark; font-family:Segoe UI,Arial,sans-serif;}
+  * {box-sizing:border-box}
+  html,body {margin:0;padding:0;width:360px;overflow:hidden}
+  body {background:#211a2d;color:#f8f4ff;font-size:12px}
+  main {padding:13px 15px 12px;display:flex;flex-direction:column;gap:9px}
+  header {display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:43px}
+  .brand {min-width:0}
+  h1 {font-size:17px;line-height:1.15;margin:0 0 3px;font-weight:700}
+  .subtitle {font-size:11px;color:#c8b4e0}
+  .logo {width:43px;height:43px;object-fit:contain;flex:none}
+  h2 {font-size:12px;margin:0 0 7px}
+  .section {display:flex;flex-direction:column;gap:7px}
+  .hint {margin:0;color:#d6c9e2;line-height:1.3}
+  input,textarea {display:block;width:100%;border:1px solid #9a81b4;background:#30233f;color:white;border-radius:2px;font:12px Segoe UI,Arial,sans-serif;outline-offset:1px}
+  input {height:31px;padding:6px 9px}
+  textarea {height:75px;resize:none;padding:8px;font-family:Consolas,monospace;font-size:11px;line-height:1.3;background:#f8f6fa;color:#251b30}
+  button {min-height:31px;border:1px solid #b99ad7;border-radius:2px;background:#7850a4;color:white;font:600 12px Segoe UI,Arial,sans-serif;cursor:pointer;padding:6px 9px}
+  button:hover {background:#8a60b5}
+  button:disabled {opacity:.6;cursor:wait}
+  .buttons {display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .message {margin:0;padding:7px 9px;border:1px solid #493657;border-radius:3px;background:#291f37;min-height:31px;line-height:1.3;overflow-wrap:anywhere;max-height:65px;overflow:auto}
+  .divider {border:0;border-top:1px solid #745c87;margin:0}
+  .footnote {margin:0;color:#c8b4e0;font-size:10px}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="brand">
+      <h1>Browser Extension</h1>
+      <div class="subtitle">Luclid-ii Job Copilot · v0.7.2</div>
+    </div>
+    <img class="logo" src="lii_icon.png" alt="Luclid-ii logo">
+  </header>
+  <section class="section" aria-label="Local pairing">
+    <h2>Local pairing</h2>
+    <p class="hint">Enter the local pairing code from the native host installer.</p>
+    <input id="pairing-code" type="password" autocomplete="off" spellcheck="false" placeholder="Local pairing code" aria-label="Local pairing code">
+    <div class="buttons">
+      <button id="pair" type="button">Pair with Luclid-ii</button>
+      <button id="connection" type="button">Check connection</button>
+    </div>
+    <p id="pair-status" class="message" role="status" aria-live="polite">Not checked yet.</p>
+  </section>
+  <hr class="divider">
+  <section class="section" aria-label="Application field preview">
+    <h2>Application autofill preview</h2>
+    <p class="hint">Paste application fields as JSON. Review everything before submitting.</p>
+    <textarea id="fields" spellcheck="false" aria-label="Application fields JSON" placeholder='{"full_name":"Example Person","email":"example@example.com"}'></textarea>
+    <div class="buttons">
+      <button id="preview" type="button">Preview fields</button>
+      <button id="fill" type="button">Fill reviewed fields</button>
+    </div>
+    <p id="status" class="message" role="status" aria-live="polite">Nothing has been submitted.</p>
+  </section>
+  <p class="footnote">Autofill is manual. The extension never submits applications.</p>
+</main>
+<script src="popup.js"></script>
+</body>
+</html>
