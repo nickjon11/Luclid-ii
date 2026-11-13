@@ -1,0 +1,3 @@
+# Luclid-ii Job Copilot browser extension — v0.7.1 preview
+
+Load this folder as an unpacked extension in a Chromium-based browser. Open an HTTPS application form, paste a JSON object containing only `full_name`, `first_name`, `last_name`, `email`, or `phone`, and click **Preview matching fields** before **Fill reviewed fields**. No automatic submission, LinkedIn account integration, resume parsing, or native app connection is implemented yet. Never paste credentials or sensitive identification numbers. Fields are processed in the active tab; no remote service is called. Some React-controlled forms may not accept programmatic changes. This is a foundation for later native-app integration, not a complete Simplify replacement.

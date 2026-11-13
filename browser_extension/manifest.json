@@ -1,0 +1,8 @@
+{
+  "manifest_version": 3,
+  "name": "Luclid-ii Job Copilot (Preview)",
+  "version": "0.7.1",
+  "description": "Review-first assistance for job application forms.",
+  "permissions": ["activeTab", "scripting"],
+  "action": {"default_popup": "popup.html"}
+}

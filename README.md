@@ -1,4 +1,4 @@
-# Luclid-ii — AI Agent v0.7.0
+# Luclid-ii — AI Agent v0.7.1
 
 Cross-platform desktop AI agent, powered by local Ollama models.
 
@@ -179,3 +179,7 @@ Commands still require individual approval.
 
 ### One-time native installation (v0.7.0)
 Install with the Windows setup EXE, macOS DMG, or Linux DEB once; then launch the installed app directly from Start Menu, Applications, or your desktop environment. Portable ZIPs and the legacy Windows BAT fallback remain available. See [INSTALL.md](INSTALL.md).
+
+
+## v0.7.1 preview
+See `CHANGELOG_v0.7.1.md` and `browser_extension/README.md`.
